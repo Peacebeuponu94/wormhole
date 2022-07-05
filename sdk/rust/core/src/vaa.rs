@@ -200,7 +200,7 @@ fn parse_vaa(input: &[u8]) -> IResult<&[u8], VAA> {
 pub struct GovHeader {
     pub module: [u8; 32],
     pub action: u8,
-    pub chains: Chain,
+    pub target: Chain,
 }
 
 pub trait GovernanceAction: Sized {
@@ -229,7 +229,7 @@ pub trait GovernanceAction: Sized {
                 (&mut module[32 - modlen..]).copy_from_slice(&Self::MODULE);
 
                 // Verify Governance Data.
-                let valid_chain = chain == header.chains || chain == Chain::Any;
+                let valid_chain = chain == header.target || chain == Chain::Any;
                 let valid_action = header.action == Self::ACTION;
                 let valid_module = module == header.module;
                 require!(valid_action, InvalidGovernanceAction);
@@ -254,13 +254,13 @@ pub fn parse_action<A: GovernanceAction>(input: &[u8]) -> IResult<&[u8], (GovHea
 pub fn parse_governance_header<'i, 'a>(input: &'i [u8]) -> IResult<&'i [u8], GovHeader> {
     let (i, module) = parse_fixed(input)?;
     let (i, action) = u8(i)?;
-    let (i, chains) = u16(Endianness::Big)(i)?;
+    let (i, target) = u16(Endianness::Big)(i)?;
     Ok((
         i,
         GovHeader {
             module,
             action,
-            chains: Chain::try_from(chains).unwrap(),
+            target: Chain::try_from(target).unwrap(),
         },
     ))
 }
@@ -289,7 +289,7 @@ mod testing {
         // Confirm Parsed matches Required.
         assert_eq!(&header.module, &module[..]);
         assert_eq!(header.action, 1);
-        assert_eq!(header.chains, Chain::Any);
+        assert_eq!(header.target, Chain::Any);
     }
 
     // Legacy VAA Signature Struct.
