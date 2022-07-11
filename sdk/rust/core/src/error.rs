@@ -15,7 +15,7 @@ type ErrorCode = usize;
 #[derive(Debug)]
 pub enum WormholeError {
     // Governance Errors
-    InvalidGovernanceAction,
+    UnknownGovernanceAction,
     InvalidGovernanceChain,
     InvalidGovernanceModule,
 
@@ -31,5 +31,5 @@ pub enum WormholeError {
 
     // Serialization Errors
     DeserializeFailed,
-    ParseError(ErrorCode),
+    ParseFailed(ErrorCode),
 }
